@@ -1,0 +1,227 @@
+# WHD bash profile by JEKA. Loaded by .bash_profile
+
+
+
+
+
+
+#############################################################################
+# Loading aliases
+#############################################################################
+. ~/.bash_aliases
+
+
+#############################################################################
+# EXPORTS
+#############################################################################
+# P4 settings
+export P4USER=jeka
+export P4EDITOR=nano
+export P4CONFIG=.p4settings
+export P4PORT=perforce.emea.demant.com:5000
+export P4MERGE="p4merge"
+
+# flask server setup
+export FLASK_APP='/scratch/dev/web/hello.py'
+export FLASK_DEBUG=1
+
+# Add own python path to PATH
+PATH="/home/jeka/bin:/home/jeka/lib:$PATH"
+export PATH
+LD_LIBRARY_PATH=":/home/jeka/lib$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH
+
+# Adding CPPFLAGS for libffi
+export CPPFLAGS="-I$HOME/lib/libffi-3.2/include/"
+
+# Adding LDFLAGS for local lib
+export LDFLAGS="-L$HOME/lib"
+
+# Bash editor
+export EDITOR=nano
+
+
+#############################################################################
+# PS1 & PS2
+#############################################################################
+YELLOW='\[\e[0;38;5;178m\]'
+YELLOWBOLD='\[\e[1;38;5;178m\]'
+RED='\[\e[0;38;5;124m\]'
+REDBOLD='\[\e[1;38;5;124m\]'
+BLUE='\[\e[0;38;5;4m\]'
+BLUEBOLD='\[\e[1;38;5;4m\]'
+GREEN='\[\e[0;38;5;64m\]'
+GREENBOLD='\[\e[1;38;5;64m\]'
+MAGENTA='\[\e[0;38;5;205m\]'
+MAGENTABOLD='\[\e[1;38;5;205m\]'
+TURQOISE='\[\e[0;38;5;81m\]'
+TURQOISEBOLD='\[\e[1;38;5;81m\]'
+NC='\[\e[0m\]' #no color
+NCBOLD='\[\e[0m\e[2m\]' #no color
+
+DOWNBAR='\342\224\214'
+HORBAR='\342\224\200'
+UPBAR='\342\224\224'
+HORBARPLUG='\342\225\274'
+CROSS='\342\234\227'
+
+function file_module {
+    echo $HORBAR[$BLUE$(ls -al | grep ^- | wc -l)'/'$BLUEBOLD$(ls -l | grep ^d | wc -l), $BLUE$(ls -lah | grep -m 1 total | sed 's/total //')$NC]
+}
+function time_module {
+    echo $HORBAR[$NCBOLD'\A'$NC]
+}
+
+function location_module {
+    echo $HORBAR$HORBAR\<$GREEN'\w'$NC\>
+}
+function dollar_module {
+    echo '$ '
+}
+function newline_module {
+    echo "\n"$NC$UPBAR$HORBAR
+}
+
+function begin_module {
+    echo $NC$DOWNBAR$HORBAR
+}
+
+function retval_module {
+    [[ $? != 0 ]] && echo [$RED$CROSS$NC]
+}
+
+function user_module {
+     echo $HORBAR[$(if [[ ${EUID} == 0 ]]; then echo $RED'\h'; else echo $YELLOWBOLD'\u'$NC'@'$YELLOW'\h'; fi)$NC]
+}
+
+function docker_module {
+    if [[ $SSH_CLIENT == '127.0.0.1'* ]] || [[ $SSH_CLIENT == '::1'* ]]; then
+        MYCLIENT=$REDBOLD'd'$NC
+    elif [[ $SSH_CLIENT == '' ]] || [[ $SSH_CLIENT == '10.100.117.67'* ]]; then
+        MYCLIENT=$RED'l'$NC
+    else
+        MYCLIENT=$NC$SSH_CLIENT
+    fi
+    echo $HORBAR[$MYCLIENT]
+}
+
+function update_ps1 {
+    # PS1=$(begin_module)$(retval_module)$(time_module)$(user_module)$(docker_module)$(file_module)$(newline_module)$(location_module)$(dollar_module)
+    PS1=$(docker_module)$(location_module)$(dollar_module)
+}
+
+PROMPT_COMMAND=update_ps1
+
+
+
+
+
+#############################################################################
+# Syncing history after each command (to fix with multiple shell instances)
+#############################################################################
+# Avoid duplicates
+export HISTCONTROL=ignoredups:erasedups
+export HISTSIZE=65535
+export HISTFILESIZE=65535
+# When the shell exits, append to the history file instead of overwriting it
+shopt -s histappend
+# After each command, append to the history file and reread it
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+
+
+#############################################################################
+# History bind
+#############################################################################
+bind '"\e[A": history-search-backward' 2>/dev/null
+bind '"\e[B": history-search-forward' 2>/dev/null
+
+
+
+#############################################################################
+# function Extract for common file formats
+#############################################################################
+
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
+
+function extract {
+ if [ -z "$1" ]; then
+    # display usage if no parameters given
+    echo "Usage: extract <path/file_name>.<zip|rar|bz2|gz|tar|tbz2|tgz|Z|7z|xz|ex|tar.bz2|tar.gz|tar.xz>"
+    echo "       extract <path/file_name_1.ext> [path/file_name_2.ext] [path/file_name_3.ext]"
+ else
+    for n in "$@"
+    do
+      if [ -f "$n" ] ; then
+          case "${n%,}" in
+            *.tar.bz2|*.tar.gz|*.tar.xz|*.tbz2|*.tgz|*.txz|*.tar) 
+                         tar xvf "$n"       ;;
+            *.lzma)      unlzma ./"$n"      ;;
+            *.bz2)       bunzip2 ./"$n"     ;;
+            *.rar)       unrar x -ad ./"$n" ;;
+            *.gz)        gunzip ./"$n"      ;;
+            *.zip)       unzip ./"$n"       ;;
+            *.z)         uncompress ./"$n"  ;;
+            *.7z|*.arj|*.cab|*.chm|*.deb|*.dmg|*.iso|*.lzh|*.msi|*.rpm|*.udf|*.wim|*.xar)
+                         7z x ./"$n"        ;;
+            *.xz)        unxz ./"$n"        ;;
+            *.exe)       cabextract ./"$n"  ;;
+            *.cpio)      cpio -id < ./"$n"  ;;
+            *)
+                         echo "extract: '$n' - unknown archive method"
+                         return 1
+                         ;;
+          esac
+      else
+          echo "'$n' - file does not exist"
+          return 1
+      fi
+    done
+fi
+}
+
+IFS=$SAVEIFS
+
+
+
+#############################################################################
+# Custom 'cd', 'back', 'flip'
+#############################################################################
+pushd()
+{
+  if [ $# -eq 0 ]; then
+    DIR="${HOME}"
+  else
+    DIR="$1"
+  fi
+
+  builtin pushd "${DIR}" > /dev/null
+  # echo -n "DIRSTACK: "
+  # dirs
+}
+
+pushd_builtin()
+{
+  builtin pushd > /dev/null
+  # echo -n "DIRSTACK: "
+  # dirs
+}
+
+popd()
+{
+  builtin popd > /dev/null
+  # echo -n "DIRSTACK: "
+  # dirs
+}
+
+alias cd='pushd'
+alias back='popd'
+alias b='popd'
+alias flip='pushd_builtin'
+
+
+#############################################################################
+# Custom settings
+#############################################################################
+xset b off
