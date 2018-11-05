@@ -49,12 +49,13 @@ bindsym $mod+z exec --no-startup-id morc_menu
 exec_always --no-startup-id sleep 3s && xset r rate 250 50
 
 # Start applications
-exec_always --no-startup-id $dd-term
+exec --no-startup-id $dd-term
+
 for_window [instance="dropdown"] floating enable
 for_window [instance="dropdown"] move scratchpad
 
+bindsym $mod+onehalf exec --no-startup-id $dd-term
 bindsym onehalf [instance="dropdown"] scratchpad show
-#bindsym onehalf scratchpad show
 
 
 
@@ -169,6 +170,7 @@ set $ws5 5
 set $ws6 6
 set $ws7 7
 set $ws8 8
+set $ws9 9
 
 # switch to workspace
 bindsym $mod+1 workspace $ws1
@@ -179,6 +181,7 @@ bindsym $mod+5 workspace $ws5
 bindsym $mod+6 workspace $ws6
 bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
 
 # Move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $ws1
@@ -189,13 +192,17 @@ bindsym $mod+Shift+5 move container to workspace $ws5
 bindsym $mod+Shift+6 move container to workspace $ws6
 bindsym $mod+Shift+7 move container to workspace $ws7
 bindsym $mod+Shift+8 move container to workspace $ws8
+bindsym $mod+Shift+9 move container to workspace $ws9
 
 # Open applications on specific workspaces
 assign [class="Code"] $ws1
 assign [class="Google-chrome"] $ws3
+assign [class="Skype"] $ws5
+exec_always --no-startup-id spotify
+
+for_window [class="Spotify"] move to workspace $ws8
 
 # assign [class="Pale moon"] $ws2
-# assign [class="Skype"] $ws5
 # assign [class="Thunderbird"] $ws6
 # assign [class="Pcmanfm"] $ws3
 
@@ -237,10 +244,10 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 
 # exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+# bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 # Set shut down, restart and locking features
-bindsym $mod+0 mode "$mode_system"
+bindsym $mod+shift+e mode "$mode_system"
 set $mode_system (l)ock, (e)xit, switch_(u)ser, (s)uspend, (h)ibernate, (r)eboot, (Shift+s)hutdown
 mode "$mode_system" {
     bindsym l exec --no-startup-id i3exit lock, mode "default"
@@ -281,7 +288,7 @@ mode "resize" {
 }
 
 # Lock screen
-bindsym $mod+9 exec --no-startup-id blurlock
+bindsym $mod+l exec --no-startup-id blurlock
 
 # Autostart applications
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
@@ -300,6 +307,7 @@ exec_always --no-startup-id ff-theme-util
 exec_always --no-startup-id fix_xcursor
 exec --no-startup-id $browser
 exec --no-startup-id $editor
+exec --no-startup-id blueman-applet
 
 # Color palette used for the terminal ( ~/.Xresources file )
 # Colors are gathered based on the documentation:

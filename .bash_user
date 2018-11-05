@@ -1,49 +1,9 @@
-# WHD bash profile by JEKA. Loaded by .bash_profile
-
-
-
-
-
-
-#############################################################################
-# Loading aliases
-#############################################################################
-. ~/.bash_aliases
-
-
-#############################################################################
-# EXPORTS
-#############################################################################
-# P4 settings
-export P4USER=jeka
-export P4EDITOR=nano
-export P4CONFIG=.p4settings
-export P4PORT=perforce.emea.demant.com:5000
-export P4MERGE="p4merge"
-
-# flask server setup
-export FLASK_APP='/scratch/dev/web/hello.py'
-export FLASK_DEBUG=1
-
-# Add own python path to PATH
-PATH="/home/jeka/bin:/home/jeka/lib:$PATH"
-export PATH
-LD_LIBRARY_PATH=":/home/jeka/lib$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH
-
-# Adding CPPFLAGS for libffi
-export CPPFLAGS="-I$HOME/lib/libffi-3.2/include/"
-
-# Adding LDFLAGS for local lib
-export LDFLAGS="-L$HOME/lib"
-
-# Bash editor
-export EDITOR=nano
-
+# WHD bash profile by JEKA
 
 #############################################################################
 # PS1 & PS2
 #############################################################################
+
 YELLOW='\[\e[0;38;5;178m\]'
 YELLOWBOLD='\[\e[1;38;5;178m\]'
 RED='\[\e[0;38;5;124m\]'
@@ -69,14 +29,19 @@ function file_module {
     echo $HORBAR[$BLUE$(ls -al | grep ^- | wc -l)'/'$BLUEBOLD$(ls -l | grep ^d | wc -l), $BLUE$(ls -lah | grep -m 1 total | sed 's/total //')$NC]
 }
 function time_module {
-    echo $HORBAR[$NCBOLD'\A'$NC]
+    echo $NCBOLD'\A'$NC
 }
 
 function location_module {
-    echo $HORBAR$HORBAR\<$GREEN'\w'$NC\>
+    echo \ \ \<$GREEN'\w'$NC\>
 }
 function dollar_module {
-    echo '$ '
+    if [ $1 -ne 0 ]; then
+        echo -ne $RED
+    else
+        echo -ne $GREEN
+    fi
+    echo -ne ' $' $NC
 }
 function newline_module {
     echo "\n"$NC$UPBAR$HORBAR
@@ -104,13 +69,32 @@ function docker_module {
     fi
     echo $HORBAR[$MYCLIENT]
 }
-
-function update_ps1 {
+update_ps1() {
+    local EXCODE=$?
+    # PS1=$(dollar_module "$EXCODE")
+    PS1=$(time_module)$(location_module)$(dollar_module "$EXCODE")
     # PS1=$(begin_module)$(retval_module)$(time_module)$(user_module)$(docker_module)$(file_module)$(newline_module)$(location_module)$(dollar_module)
-    PS1=$(docker_module)$(location_module)$(dollar_module)
 }
+PROMPT_COMMAND="update_ps1"
 
-PROMPT_COMMAND=update_ps1
+
+
+
+
+
+
+#############################################################################
+# Loading aliases
+#############################################################################
+. ~/.bash_aliases
+
+
+#############################################################################
+# EXPORTS
+#############################################################################
+# P4 settings
+
+
 
 
 
@@ -126,7 +110,7 @@ export HISTFILESIZE=65535
 # When the shell exits, append to the history file instead of overwriting it
 shopt -s histappend
 # After each command, append to the history file and reread it
-export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+# export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 
 
@@ -135,53 +119,6 @@ export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 #############################################################################
 bind '"\e[A": history-search-backward' 2>/dev/null
 bind '"\e[B": history-search-forward' 2>/dev/null
-
-
-
-#############################################################################
-# function Extract for common file formats
-#############################################################################
-
-SAVEIFS=$IFS
-IFS=$(echo -en "\n\b")
-
-function extract {
- if [ -z "$1" ]; then
-    # display usage if no parameters given
-    echo "Usage: extract <path/file_name>.<zip|rar|bz2|gz|tar|tbz2|tgz|Z|7z|xz|ex|tar.bz2|tar.gz|tar.xz>"
-    echo "       extract <path/file_name_1.ext> [path/file_name_2.ext] [path/file_name_3.ext]"
- else
-    for n in "$@"
-    do
-      if [ -f "$n" ] ; then
-          case "${n%,}" in
-            *.tar.bz2|*.tar.gz|*.tar.xz|*.tbz2|*.tgz|*.txz|*.tar) 
-                         tar xvf "$n"       ;;
-            *.lzma)      unlzma ./"$n"      ;;
-            *.bz2)       bunzip2 ./"$n"     ;;
-            *.rar)       unrar x -ad ./"$n" ;;
-            *.gz)        gunzip ./"$n"      ;;
-            *.zip)       unzip ./"$n"       ;;
-            *.z)         uncompress ./"$n"  ;;
-            *.7z|*.arj|*.cab|*.chm|*.deb|*.dmg|*.iso|*.lzh|*.msi|*.rpm|*.udf|*.wim|*.xar)
-                         7z x ./"$n"        ;;
-            *.xz)        unxz ./"$n"        ;;
-            *.exe)       cabextract ./"$n"  ;;
-            *.cpio)      cpio -id < ./"$n"  ;;
-            *)
-                         echo "extract: '$n' - unknown archive method"
-                         return 1
-                         ;;
-          esac
-      else
-          echo "'$n' - file does not exist"
-          return 1
-      fi
-    done
-fi
-}
-
-IFS=$SAVEIFS
 
 
 
