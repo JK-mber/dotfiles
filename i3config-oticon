@@ -9,9 +9,8 @@
 # i3 config file (v4)
 #
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
-
 set $mod Mod4
-set $editor /home/jeka/usr/bin/code
+set $editor /home/jeka/bin_override/code
 set $term gnome-terminal --hide-menubar
 set $dd-term gnome-terminal --hide-menubar --title="dropdown" --geometry=300x60
 set $browser firefox-esr
@@ -43,7 +42,7 @@ workspace_auto_back_and_forth yes
 
 # Set screen positions
 exec --no-startup-id xrandr --output HDMI-1 --auto --right-of HDMI-2
-exec_always --no-startup-id xset r rate 250 50
+exec_always --no-startup-id sleep 3s && xset r rate 250 50
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -60,7 +59,7 @@ bindsym $mod+Return exec $term
 bindsym $mod+q kill
 
 # lock screen
-bindsym $mod+l exec "i3lock -e"
+bindsym $mod+l exec "i3lock -c 000000 -e"
 
 # start dmenu (a program launcher)
 # bindsym $mod+d exec dmenu_run
@@ -72,6 +71,9 @@ bindsym $mod+Down focus down
 bindsym $mod+Up focus up
 bindsym $mod+Right focus right
 
+bindsym $mod+Ctrl+Up focus parent
+bindsym $mod+Ctrl+Down focus child
+
 # move focused window
 bindsym $mod+Shift+Left move left
 bindsym $mod+Shift+Down move down
@@ -79,10 +81,10 @@ bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
 # split in horizontal orientation
-bindsym $mod+h split h
+bindsym $mod+h split v
 
 # split in vertical orientation
-bindsym $mod+v split v
+bindsym $mod+v split h
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
@@ -105,6 +107,22 @@ bindsym $mod+Shift+r restart
 
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+# # Set shut down, restart and locking features
+# bindsym $mod+shift+e mode "$mode_system"
+# set $mode_system (l)ock, (e)xit, switch_(u)ser, (s)uspend, (h)ibernate, (r)eboot, (Shift+s)hutdown
+# mode "$mode_system" {
+#     bindsym l exec --no-startup-id i3exit lock, mode "default"
+#     bindsym s exec --no-startup-id i3exit suspend, mode "default"
+#     bindsym u exec --no-startup-id i3exit switch_user, mode "default"
+#     bindsym e exec --no-startup-id i3exit logout, mode "default"
+#     bindsym h exec --no-startup-id i3exit hibernate, mode "default"
+#     bindsym r exec --no-startup-id i3exit reboot, mode "default"
+#     bindsym Shift+s exec --no-startup-id i3exit shutdown, mode "default"
+
+#     # exit system mode: "Enter" or "Escape"
+#     bindsym Return mode "default"
+#     bindsym Escape mode "default"
+# }
 
 # Start editor
 bindsym $mod+a exec --no-startup-id $editor
@@ -253,7 +271,7 @@ assign [class="^Firefox-esr$"]                  $workspace3
 assign [class="^P4V$"]                          $workspace4
 assign [class="^MATLAB R20*"]                   $workspace5
 assign [class="^Evolution$"]                    $workspace6
-assign [class="^Xterm$" title="matlab"]         $workspace10
+assign [class="^Xterm$"]                        $workspace10
 
 
 ##################################
